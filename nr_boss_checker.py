@@ -131,7 +131,6 @@ for s in s_idx:
         ls_id = sid
         ls_idx = s
         
-print(ls_idx)
 print("Last Session ID: %u" % ls_id)
 debug("Last Session Index: %u" % ls_idx)
 
