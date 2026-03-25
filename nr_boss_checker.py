@@ -29,7 +29,7 @@ class BND4Entry:
             decryptor = Cipher(algorithms.AES(NR_KEY), modes.CBC(self._iv)).decryptor()
             decrypted_raw = decryptor.update(self._encrypted_payload) + decryptor.finalize()
             
-            self._clean_data = decrypted_raw 
+            self._clean_data = decrypted_raw
             
             return self._clean_data
             
@@ -104,22 +104,21 @@ target = entry.decrypt()
 debug("--------------------------")
 debug()
 
-nickname = target[6496:6527].replace(b'\x00', b'').decode()
-print("Nickname: %s" % nickname)
-name_pattern = nickname.encode("utf-16le")
+nickname = target[6498:6530]
+print("Nickname: %s" % nickname.replace(b'\x00', b'').decode())
 
 s_idx = []
 start = 6600
 
 while True:
-    i = target.find(name_pattern, start)
+    i = target.find(nickname, start)
     if i == -1:
         break
 
     if target[i - 20] == 0:
         s_idx.append(i - 100)
 
-    start = i + len(name_pattern)
+    start = i + len(nickname)
 
 ls_id = -1
 ls_idx = None
@@ -131,7 +130,8 @@ for s in s_idx:
     if sid > ls_id:
         ls_id = sid
         ls_idx = s
-
+        
+print(ls_idx)
 print("Last Session ID: %u" % ls_id)
 debug("Last Session Index: %u" % ls_idx)
 
