@@ -1,9 +1,8 @@
 import sys
 import struct
-# import argparse
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-def debug(msg: str = '') -> None:
+def debug(msg: str = '', end='\n') -> None:
     if DEBUG_MODE: 
         print(msg)
 
@@ -41,12 +40,6 @@ class BND4Entry:
 NR_KEY = b'\x18\xF6\x32\x66\x05\xBD\x17\x8A\x55\x24\x52\x3A\xC0\xA0\xC6\x09'
 DEBUG_MODE = False
 input_file = None
-
-# parser = argparse.ArgumentParser(description='Nightlord checker in ER-NR SL2 save files.')
-# parser.add_argument('input_sl2', metavar='input.sl2', help='the SL2 save file to use as input (this will not be modified).')
-# args = parser.parse_args()
-
-# input_sl2_file = args.input_sl2
 input_sl2_file = "NR0000.sl2"
 
 raw = b''
@@ -104,37 +97,60 @@ target = entry.decrypt()
 debug("--------------------------")
 debug()
 
-nickname = target[6498:6530]
-print("Nickname: %s" % nickname.replace(b'\x00', b'').decode())
+nicknames = []
+SLOT_NICKNAME_INDEX = 6498
+SLOT_DATA_LEN = 656
+NICKNAME_LEN = 32
 
-s_idx = []
-start = 6600
+for i in range(10):
+    n_idx = SLOT_NICKNAME_INDEX + SLOT_DATA_LEN * i
+    nickname = target[n_idx:n_idx+NICKNAME_LEN]
+    if any(nickname):
+        nicknames.append(nickname)
 
-while True:
-    i = target.find(nickname, start)
-    if i == -1:
-        break
+if DEBUG_MODE:
+    debug("Nicknames: ", end="")
+    for n in nicknames:
+        debug(n.replace(b'\x00', b'').decode(), end="")
+    debug()
+    debug("--------------------------")
+    debug()
 
-    if target[i - 20] == 0:
-        s_idx.append(i - 100)
+rls_id = 0
+rls_idx = None
 
-    start = i + len(nickname)
+for nickname in nicknames:
+    start = SLOT_NICKNAME_INDEX + SLOT_DATA_LEN * 10
+    s_idx = []
+    ls_id = -1
+    ls_idx = None
 
-ls_id = -1
-ls_idx = None
+    while True:
+        i = target.find(nickname, start)
+        if i == -1:
+            break
 
-for s in s_idx:
-    sid_idx = s + 12
-    sid = int.from_bytes(target[sid_idx:sid_idx+4], byteorder='little')
+        if target[i - 20] == 0:
+            s = i - 100
+            sid_idx = s + 12
+            sid = int.from_bytes(target[sid_idx:sid_idx+4], byteorder='little')
 
-    if sid > ls_id:
-        ls_id = sid
-        ls_idx = s
-        
-print("Last Session ID: %u" % ls_id)
-debug("Last Session Index: %u" % ls_idx)
+            if sid > ls_id:
+                ls_id = sid
+                ls_idx = s
 
-boss = target[ls_idx + 54:ls_idx + 56]
+        start = i + len(nickname)
+
+    if ls_id > rls_id:
+        rls_nick = nickname
+        rls_id = ls_id
+        rls_idx = ls_idx
+
+print("Nickname: %s" % rls_nick.replace(b'\x00', b'').decode())
+print("Last Session ID: %u" % rls_id)
+debug("Last Session Index: %u" % rls_idx)
+
+boss = target[rls_idx + 54:rls_idx + 56]
 debug("Boss ID: %s" % boss.hex(' '))
 
 NL_list = ["Gladius", "Adel", "Gnoster", "Maris", "Libra", "Fulghor", "Caligo", "Heolstor", "Harmonia", "Straghess"]
@@ -145,7 +161,3 @@ if boss[1] == 1:
     print("YES")
 else:
     print("No")
-
-# print()
-# print()
-# input("Press Enter to Exit...")
