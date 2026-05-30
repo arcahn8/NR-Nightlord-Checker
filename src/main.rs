@@ -1,6 +1,6 @@
 use std::fs;
 use std::io;
-use std::path::Path;
+// use std::path::Path;
 use aes::cipher::{block_padding::Pkcs7, BlockModeDecrypt, KeyIvInit};
 
 const NR_KEY: &[u8; 16] = b"\x18\xF6\x32\x66\x05\xBD\x17\x8A\x55\x24\x52\x3A\xC0\xA0\xC6\x09";
@@ -33,16 +33,16 @@ macro_rules! enter_exit {
     }}
 }
 
-fn save_file<P: AsRef<Path>>(file_path: P, data: &[u8]) {
-    let path = file_path.as_ref();
-    if let Some(parent_dir) = path.parent() {
-        if !parent_dir.exists() {
-            fs::create_dir_all(parent_dir).expect("폴더 생성에 실패했습니다.");
-        }
-    }
+// fn save_file<P: AsRef<Path>>(file_path: P, data: &[u8]) {
+//     let path = file_path.as_ref();
+//     if let Some(parent_dir) = path.parent() {
+//         if !parent_dir.exists() {
+//             fs::create_dir_all(parent_dir).expect("폴더 생성에 실패했습니다.");
+//         }
+//     }
 
-    fs::write(path, data).expect("파일 저장에 실패했습니다.")
-}
+//     fs::write(path, data).expect("파일 저장에 실패했습니다.")
+// }
 type Aes128CbcDec = cbc::Decryptor<aes::Aes128>;
 
 struct Bnd4Entry {
