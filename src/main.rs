@@ -86,10 +86,12 @@ fn find_last_session<'a>(target: &'a [u8], nicknames: &[&'a [u8]]) -> Option<Ses
     if target.len() < search_start { return None; }
 
     let rscl = target[search_start..].windows(4).position(|window| window == b"RSCL");
+    my_dbg!(rscl);
     let search_end = match rscl {
-        Some(idx) => (idx + 20 + SESSION_DATA_LEN * 100).min(target.len()),
-        None => (search_start + 8592 + SESSION_DATA_LEN * 100).min(target.len()),
+        Some(idx) => (search_start + idx + 20 + SESSION_DATA_LEN * 101).min(target.len()),
+        None => (search_start + 8592 + SESSION_DATA_LEN * 101).min(target.len()),
     };
+    my_dbg!(search_end);
 
     nicknames.iter().filter_map(|&nickname| {
         target[search_start..search_end]
