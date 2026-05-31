@@ -10,6 +10,7 @@ const BND4_ENTRY_HEADER_LEN: usize = 32;
 const TARGET_ENTRY_NUM: usize = 10;
 const SLOT_NICKNAME_INDEX: usize = 6498;
 const SLOT_DATA_LEN: usize = 656;
+const SESSION_DATA_LEN: usize = 1872;
 const NICKNAME_LEN: usize = 32;
 const NL_LIST: [&str; 10] = ["Gladius", "Adel", "Gnoster", "Maris", "Libra", "Fulghor", "Caligo", "Heolstor", "Harmonia", "Straghess"];
 
@@ -84,8 +85,14 @@ fn find_last_session<'a>(target: &'a [u8], nicknames: &[&'a [u8]]) -> Option<Ses
     let search_start = SLOT_NICKNAME_INDEX + SLOT_DATA_LEN * 10;
     if target.len() < search_start { return None; }
 
+    let rscl = target[search_start..].windows(4).position(|window| window == b"RSCL");
+    let search_end = match rscl {
+        Some(idx) => (idx + 20 + SESSION_DATA_LEN * 100).min(target.len()),
+        None => (search_start + 8592 + SESSION_DATA_LEN * 100).min(target.len()),
+    };
+
     nicknames.iter().filter_map(|&nickname| {
-        target[search_start..]
+        target[search_start..search_end]
             .windows(nickname.len())
             .enumerate()
             .filter(|(_, window)| *window == nickname)
