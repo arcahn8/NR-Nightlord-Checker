@@ -12,7 +12,7 @@ const SLOT_NICKNAME_INDEX: usize = 6498;
 const SLOT_DATA_LEN: usize = 656;
 const SESSION_DATA_LEN: usize = 1872;
 const NICKNAME_LEN: usize = 32;
-const NL_LIST: [&str; 10] = ["Gladius", "Adel", "Gnoster", "Maris", "Libra", "Fulghor", "Caligo", "Heolstor", "Harmonia", "Straghess"];
+const NL_LIST: [&str; 10] = ["Gladius (글라디우스)", "Adel (에델레)", "Gnoster (그노스터)", "Maris (마리스)", "Libra (리브라)", "Fulghor (풀고르)", "Caligo (칼리고)", "Heolstor (나멜레스)", "Harmonia (하르모니아)", "Straghess (스트라게스)"];
 
 macro_rules! my_dbg {
     ($val:expr) => {
